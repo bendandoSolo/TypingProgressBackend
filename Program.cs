@@ -1,3 +1,7 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using WebAPITestProj1.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole(); // Still log to the console (optional)
@@ -7,6 +11,13 @@ builder.Logging.AddDebug();    // This will log to the Output window
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+
+string DefaultConnection = "Server=(localdb)\\MSSQLLocalDB;Database=TypingProgress;Trusted_Connection=True;MultipleActiveResultSets=true";
+
+builder.Services.AddDbContext<TypingDBContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString(DefaultConnection)));
+
 
 var app = builder.Build();
 
@@ -42,6 +53,15 @@ app.MapGet("/weatherforecast", () =>
     return forecast;
 })
 .WithName("GetWeatherForecast")
+.WithOpenApi();
+
+app.MapGet("/typingData", async ([FromServices]  TypingDBContext dbContext) =>
+{
+    logger.LogInformation("typing data endpoint requested");
+    var items = await dbContext.Typing2024s.ToListAsync();
+    return Results.Ok(items);
+})
+.WithName("typingData")
 .WithOpenApi();
 
 logger.LogInformation("Testing logging in Program.cs");
