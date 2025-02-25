@@ -13,13 +13,26 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
+
 string DefaultConnection = "Server=(localdb)\\MSSQLLocalDB;Database=TypingProgress;Trusted_Connection=True;MultipleActiveResultSets=true";
 
 builder.Services.AddDbContext<TypingDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString(DefaultConnection)));
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
+});
 
 var app = builder.Build();
+
+app.UseCors("AllowAll");
 
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 logger.LogInformation("Testing logging in Program.cs");
