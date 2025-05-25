@@ -12,12 +12,8 @@ builder.Logging.AddDebug();    // This will log to the Output window
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
-
-string DefaultConnection = "Server=(localdb)\\MSSQLLocalDB;Database=TypingProgress;Trusted_Connection=True;MultipleActiveResultSets=true";
-
 builder.Services.AddDbContext<TypingDBContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString(DefaultConnection)));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddCors(options =>
 {
@@ -45,28 +41,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-
-    logger.LogInformation("weatherforecast endpoint requested");
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
 
 app.MapGet("/typingData", async ([FromServices]  TypingDBContext dbContext) =>
 {
